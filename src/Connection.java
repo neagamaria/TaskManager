@@ -1,18 +1,17 @@
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 
 public class Connection extends Thread{
     int clientNumber;
     Socket clientSocket = null;
-    InputStream in = null;
+    DataInputStream in = null;
+    ObjectOutputStream out = null;
 
     public Connection(Socket s, int nr) throws IOException {
         this.clientSocket = s;
         this.clientNumber = nr;
-        in = clientSocket.getInputStream();
+
         // pornire fir curent
         start();
     }
@@ -20,15 +19,23 @@ public class Connection extends Thread{
     // operatiile pentru firul de executie curent
     @Override
     public void run() {
-        // creeaza lista de task-uri
-        ArrayList<Task> taskList = new ArrayList<>();
-        String text = "";
-        DataInputStream in = null;
         try {
             in = new DataInputStream(clientSocket.getInputStream());
+            out = new ObjectOutputStream(clientSocket.getOutputStream());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        // trimite catre client numarul sau
+        /*try {
+            out.writeUTF(Integer.toString(clientNumber));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }*/
+
+        // creeaza lista de task-uri
+        ArrayList<Task> taskList = new ArrayList<>();
+        String text = "";
 
         while(true) {
             try {
@@ -82,9 +89,14 @@ public class Connection extends Thread{
                     break;
 
                 case '5':
-                    // afiseaza lista
-                    for(Task task: taskList) {
-                        System.out.println(task.toString());
+                    // trimite lista de task-uri catre client
+                    synchronized(taskList) {
+                        try {
+                            out.writeObject(taskList);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+
                     }
                     break;
 

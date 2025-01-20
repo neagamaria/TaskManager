@@ -17,13 +17,13 @@ public class TaskManagerServer {
         System.out.println("Portul pentru server: ");
         ServerSocket serverSocket = new ServerSocket(sc.nextInt());
         sc.nextLine();
-        System.out.println("Serverul a pornit");
+        System.out.println("Serverul ruleaza");
 
         // conectarea cu socketul clientului
-        while(true) {
+        while (true) {
             Socket clientSocket = serverSocket.accept();
             clientNumber++;
-            System.out.println("Clientul " + clientNumber + "  conectat");
+            System.out.println("Clientul " + clientNumber + " conectat");
             new Connection(clientSocket, clientNumber);
         }
     }
