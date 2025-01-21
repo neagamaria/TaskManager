@@ -7,8 +7,9 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class TaskManagerClient {
-    public static void main(String[] args) throws IOException, ClassNotFoundException {
+    public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
         Socket clientSocket = null;
+        Window clientWindow = null;
         Scanner sc = new Scanner(System.in);
         System.out.println("Adresa si portul serverului: ");
         try {
@@ -27,7 +28,7 @@ public class TaskManagerClient {
 
         // deschide fereastra pentru client
         try {
-            Window clientWindow = new Window("test");
+            clientWindow = new Window("test");
             clientWindow.setSize(800, 300);
             clientWindow.setVisible(true);
         }
@@ -35,23 +36,46 @@ public class TaskManagerClient {
             System.out.println(e.getMessage());
         }
 
-
         while(true) {
-            System.out.println("Comanda: ");
-            String text = sc.nextLine();
-            out.writeUTF(text);
+            String text = null;
 
-            if(text.equals("END"))
-                break;
+            if(clientWindow.command != "") {
+                // opreste temporar firul curent pentru a procesa comanda
+                Thread.sleep(60);
 
-            if(text.charAt(0) == '5') {
-                // scrie lista de task uri primite
-                ArrayList<Task> taskList= (ArrayList<Task>)in.readObject();
+                switch(clientWindow.command) {
+                    case "1":
+                        text = clientWindow.textbox.getText().trim();
+                        out.writeUTF("1"+text);
+                        clientWindow.command = "";
+                        out.flush();
+                        break;
 
-                for(Task task: taskList) {
-                    System.out.println(task.toString());
+                    case "5":
+                        out.writeUTF("5");
+                        // scrie lista de task uri primite
+                        ArrayList<Task> taskList= (ArrayList<Task>)in.readObject();
+
+                        for(Task task: taskList) {
+                            clientWindow.display.append(task.toString() + "\n");
+                            System.out.println(task.toString());
+                        }
+
+                        clientWindow.command = "";
+                        break;
                 }
+
+
+                if(clientWindow.command.equals("END"))
+                    break;
             }
+
+           /*System.out.println("Comanda: ");
+            String text = sc.nextLine();
+            out.writeUTF(text);*/
+
+
+
         }
 
         clientSocket.close(); out.close();

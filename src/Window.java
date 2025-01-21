@@ -1,3 +1,4 @@
+import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -12,12 +13,16 @@ public class Window extends Frame {
     Label label;
     TextField textbox;
     TextArea display;
+
+    // orice modificare a comenzii sa fie vizibila
+    volatile String command = "";
+
     public Window(String client) {
         super();
 
         // creeaza zona de output
         display = new TextArea();
-        display.setVisible(false);
+        display.setVisible(true);
 
         setLayout(new BorderLayout());
         label = new Label("Bine ai venit, client " + client);
@@ -36,38 +41,31 @@ public class Window extends Frame {
         buttonArea.add(b2);
         buttonArea.add(b3);
 
+
         add(label, BorderLayout.NORTH);
         add(buttonArea, BorderLayout.SOUTH);
-        //add(textbox, BorderLayout.SOUTH);
-       // add(display);
+        add(textbox, BorderLayout.CENTER);
+        add(display, BorderLayout.EAST);
 
         // adauga evenimente butoanelor
-        // Handler H = new Handler(this);
-
-
+        Handler handler = new Handler(this);
+        b1.addActionListener(handler);
+        b2.addActionListener(handler);
+        b3.addActionListener(handler);
     }
 
-    /*class Handler implements ActionListener, Serializable {
+    class Handler implements ActionListener, Serializable {
         Window w;
         Handler(Window w) { this.w = w; }
         public void actionPerformed(ActionEvent e) {
             String command = e.getActionCommand();
             if("Adauga activitate".equals(command)) {
-
+                w.command = "1";
             }
-            else if("Afiseaza lista".equals(command)) {
 
+            else if("Afiseaza lista".equals(command)) {
+                w.command = "5";
             }
         }
     }
-
-    public void addCommand() {
-        String text = textbox.getText();
-        if(text.isEmpty()) {
-            display.setVisible(true);
-            display.append("Activitatea nu poate fi adaugata in lista");
-            return;
-        }
-
-    }*/
 }

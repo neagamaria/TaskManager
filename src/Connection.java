@@ -26,13 +26,6 @@ public class Connection extends Thread{
             throw new RuntimeException(e);
         }
 
-        // trimite catre client numarul sau
-        /*try {
-            out.writeUTF(Integer.toString(clientNumber));
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }*/
-
         // creeaza lista de task-uri
         ArrayList<Task> taskList = new ArrayList<>();
         String text = "";
@@ -49,6 +42,7 @@ public class Connection extends Thread{
             int command  = text.charAt(0);
             text = text.substring(1);
             int id = 0;
+
             switch(command) {
                 case '1':
                     // adauga task in lista
@@ -90,6 +84,7 @@ public class Connection extends Thread{
 
                 case '5':
                     // trimite lista de task-uri catre client
+                    System.out.println("Am ajuns aici!");
                     synchronized(taskList) {
                         try {
                             out.writeObject(taskList);
