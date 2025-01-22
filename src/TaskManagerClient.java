@@ -46,9 +46,26 @@ public class TaskManagerClient {
                 switch(clientWindow.command) {
                     case "1":
                         text = clientWindow.textbox.getText().trim();
-                        out.writeUTF("1"+text);
+                        out.writeUTF("1" + text);
                         clientWindow.command = "";
                         out.flush();
+                        clientWindow.textbox.setText("");
+                        break;
+
+                    case "2":
+                        text = clientWindow.textbox.getText().trim();
+                        out.writeUTF("2" + text);
+                        clientWindow.command = "";
+                        out.flush();
+                        clientWindow.textbox.setText("");
+                        break;
+
+                    case "4":
+                        text = clientWindow.textbox.getText().trim();
+                        out.writeUTF("4" + text);
+                        clientWindow.command = "";
+                        out.flush();
+                        clientWindow.textbox.setText("");
                         break;
 
                     case "5":
@@ -56,26 +73,24 @@ public class TaskManagerClient {
                         // scrie lista de task uri primite
                         ArrayList<Task> taskList= (ArrayList<Task>)in.readObject();
 
+                        int index = 0;
                         for(Task task: taskList) {
-                            clientWindow.display.append(task.toString() + "\n");
-                            System.out.println(task.toString());
+                            index++;
+                            clientWindow.display.append(index + ". " + task.toString() + "\n");
                         }
 
+                        System.out.println("\n\n");
                         clientWindow.command = "";
                         break;
                 }
 
 
-                if(clientWindow.command.equals("END"))
+                if(clientWindow.command.equals("END")) {
+                    clientWindow.dispose();
+                    clientWindow.setVisible(false);
                     break;
+                }
             }
-
-           /*System.out.println("Comanda: ");
-            String text = sc.nextLine();
-            out.writeUTF(text);*/
-
-
-
         }
 
         clientSocket.close(); out.close();

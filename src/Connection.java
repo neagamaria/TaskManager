@@ -50,18 +50,22 @@ public class Connection extends Thread{
                     break;
                 case '2':
                     // sterge task din lista
-                    int removeId = text.charAt(0) - '0';
+                    int removeId = text.charAt(0) - '1';
+                    int index = 0;
                     for(Task task: taskList) {
-                        if(task.getId() == removeId) {
+                        if(index == removeId) {
+                            System.out.println("Sterge in Connection " + text);
                             taskList.remove(task);
                             break;
                         }
+
+                        index++;
                     }
                     break;
 
                 case '3':
                     // editeaza un task
-                    int editId = text.charAt(0) - '0';
+                    int editId = text.charAt(0) - '1';
                     text = text.substring(1);
                     for(int i=0; i < taskList.size(); i++) {
                         if(i == editId) {
@@ -73,18 +77,16 @@ public class Connection extends Thread{
 
                 case '4':
                     // finalizeaza task
-                    int statusId = text.charAt(0) - '0';
-                    for(int i = 0; i < taskList.size(); i++) {
-                        if(i == statusId) {
-                            taskList.get(i).setStatus("Finalizat");
-                            break;
-                        }
-                    }
+                   int statusId = text.charAt(0) - '1';
+                    System.out.println(statusId + " " + taskList.size());
+
+                    if(statusId < taskList.size())
+                        taskList.get(statusId).setStatus("Finalizat");
+
                     break;
 
                 case '5':
                     // trimite lista de task-uri catre client
-                    System.out.println("Am ajuns aici!");
                     synchronized(taskList) {
                         try {
                             out.writeObject(taskList);
