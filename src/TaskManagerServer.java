@@ -11,16 +11,21 @@ public class TaskManagerServer {
     // indexul clientului curent
     static int clientNumber = 0;
     public static void main(String[] args) throws IOException {
-
+        ServerSocket serverSocket;
         // creare socket server
         Scanner sc = new Scanner(System.in);
         System.out.println("Portul pentru server: ");
-        ServerSocket serverSocket = new ServerSocket(sc.nextInt());
+        try {
+            serverSocket = new ServerSocket(sc.nextInt());
+        }
+        catch(Exception e) {
+            throw new RuntimeException(e);
+        }
         sc.nextLine();
         System.out.println("Serverul ruleaza");
 
-        // conectarea cu socketul clientului
         while (true) {
+            // acceptă conectarea cu un nou socket de client
             Socket clientSocket = serverSocket.accept();
             clientNumber++;
             System.out.println("Clientul " + clientNumber + " conectat");

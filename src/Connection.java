@@ -2,13 +2,13 @@ import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 
-public class Connection extends Thread{
+public class Connection extends Thread {
     int clientNumber;
     Socket clientSocket = null;
     DataInputStream in = null;
     ObjectOutputStream out = null;
 
-    public Connection(Socket s, int nr) throws IOException {
+    public Connection(Socket s, int nr){
         this.clientSocket = s;
         this.clientNumber = nr;
 
@@ -26,21 +26,22 @@ public class Connection extends Thread{
             throw new RuntimeException(e);
         }
 
+        // trimite catre client numarul sau
+        try {
+            out.writeUTF(Integer.toString(clientNumber));
+            out.reset();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         // creeaza lista de task-uri
         ArrayList<Task> taskList = new ArrayList<>();
         String text = "";
 
         while(true) {
-            try {
-                text = in.readUTF();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            if(text.equals("END"))
-                break;
 
             int command  = text.charAt(0);
-            text = text.substring(1);
+            text = text.substring(1).trim();
             int id = 0;
 
             switch(command) {
@@ -50,52 +51,73 @@ public class Connection extends Thread{
                     break;
                 case '2':
                     // sterge task din lista
-                    int removeId = text.charAt(0) - '1';
-                    int index = 0;
-                    for(Task task: taskList) {
-                        if(index == removeId) {
-                            System.out.println("Sterge in Connection " + text);
-                            taskList.remove(task);
-                            break;
-                        }
+                    int removeId = Integer.parseInt(text) - 1;
 
-                        index++;
+                    if(removeId < 0 || removeId > taskList.size() - 1) {
+                        try {
+                            out.writeUTF("Numarul activitatii introdus gresit");
+                            out.flush();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
+                    else {
+                        taskList.remove(removeId);
+                        try {
+                            out.writeUTF("");
+                            out.flush();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+
                     break;
 
                 case '3':
-                    // editeaza un task
-                    int editId = text.charAt(0) - '1';
-                    text = text.substring(1);
-                    for(int i=0; i < taskList.size(); i++) {
-                        if(i == editId) {
-                            taskList.get(i).setText(text);
-                            break;
+                    // finalizeaza task
+                    int statusId = Integer.parseInt(text) - 1;
+
+                    if(statusId < 0 || statusId > taskList.size() -1) {
+                        try {
+                            out.writeUTF("Numarul activitatii introdus gresit");
+                            out.flush();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
                         }
                     }
+                    else {
+                        taskList.get(statusId).setStatus("Finalizat");
+                        try {
+                            out.writeUTF("");
+                            out.flush();
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+
                     break;
 
                 case '4':
-                    // finalizeaza task
-                   int statusId = text.charAt(0) - '1';
-                    System.out.println(statusId + " " + taskList.size());
-
-                    if(statusId < taskList.size())
-                        taskList.get(statusId).setStatus("Finalizat");
-
-                    break;
-
-                case '5':
                     // trimite lista de task-uri catre client
                     synchronized(taskList) {
                         try {
+                            // curata output-ul de valorile precedente
+                            out.reset();
                             out.writeObject(taskList);
+                            out.flush();
                         } catch (IOException e) {
                             throw new RuntimeException(e);
                         }
 
                     }
                     break;
+
+                case '5':
+                    System.out.println("Inchide");
+
+                    // inchide conexiunea
+                    System.out.println("Clientul " + clientNumber + " deconectat");
+                    return;
 
                 default:
                     System.out.println("Comanda gresita");

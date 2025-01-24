@@ -1,4 +1,3 @@
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -7,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class TaskManagerClient {
+
     public static void main(String[] args) throws IOException, ClassNotFoundException, InterruptedException {
         Socket clientSocket = null;
         Window clientWindow = null;
@@ -14,6 +14,7 @@ public class TaskManagerClient {
         System.out.println("Adresa si portul serverului: ");
         try {
             clientSocket = new Socket(sc.next(), sc.nextInt());
+            System.out.println("Conectat la server");
             sc.nextLine();
         } catch (Exception e) {
             System.out.println("Conexiune esuata " + new RuntimeException(e));
@@ -23,28 +24,31 @@ public class TaskManagerClient {
         ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
         DataOutputStream out = new DataOutputStream(clientSocket.getOutputStream());
 
-        // ia numarul clientului
-        //String number = in.readUTF();
 
         // deschide fereastra pentru client
         try {
-            clientWindow = new Window("test");
-            clientWindow.setSize(800, 300);
+            // ia numarul clientului
+            String number = in.readUTF();
+            System.out.println(number);
+
+            clientWindow = new Window(number);
+            clientWindow.setSize(1000, 500);
             clientWindow.setVisible(true);
         }
         catch(Exception e) {
             System.out.println(e.getMessage());
         }
 
-        while(true) {
-            String text = null;
+        String text;
 
+        while(true) {
             if(clientWindow.command != "") {
                 // opreste temporar firul curent pentru a procesa comanda
                 Thread.sleep(60);
 
                 switch(clientWindow.command) {
                     case "1":
+                        clientWindow.errorMessage.setText("");
                         text = clientWindow.textbox.getText().trim();
                         out.writeUTF("1" + text);
                         clientWindow.command = "";
@@ -58,18 +62,22 @@ public class TaskManagerClient {
                         clientWindow.command = "";
                         out.flush();
                         clientWindow.textbox.setText("");
+                        clientWindow.errorMessage.setText(in.readUTF());
                         break;
 
-                    case "4":
+                    case "3":
                         text = clientWindow.textbox.getText().trim();
-                        out.writeUTF("4" + text);
+                        out.writeUTF("3" + text);
                         clientWindow.command = "";
                         out.flush();
                         clientWindow.textbox.setText("");
+                        clientWindow.errorMessage.setText(in.readUTF());
                         break;
 
-                    case "5":
-                        out.writeUTF("5");
+                    case "4":
+                        clientWindow.errorMessage.setText("");
+                        clientWindow.display.setText("");
+                        out.writeUTF("4");
                         // scrie lista de task uri primite
                         ArrayList<Task> taskList= (ArrayList<Task>)in.readObject();
 
@@ -79,15 +87,22 @@ public class TaskManagerClient {
                             clientWindow.display.append(index + ". " + task.toString() + "\n");
                         }
 
-                        System.out.println("\n\n");
                         clientWindow.command = "";
                         break;
                 }
 
 
-                if(clientWindow.command.equals("END")) {
+                if(clientWindow.command.equals("5")) {
+                    //comanda catre conexiune pentru inchidere
+                    out.writeUTF("5");
+
+                    // inchidere fereastra
                     clientWindow.dispose();
                     clientWindow.setVisible(false);
+
+                    // inchidere socket
+                    clientSocket.close();
+                    out.close();
                     break;
                 }
             }

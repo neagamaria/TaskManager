@@ -14,21 +14,8 @@ public class Task implements Serializable {
         this.status = status;
     }
 
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    public int getId() {
-        return this.id;
-    }
-
-    public String getText() {
-        return this.text;
-    }
-
     @Override
     public String toString() {
-
         return this.text + " - " + this.status;
     }
 }
