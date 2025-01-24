@@ -7,10 +7,15 @@ public class Connection extends Thread {
     Socket clientSocket = null;
     DataInputStream in = null;
     ObjectOutputStream out = null;
+    ArrayList<Task> taskList;
+    String text;
+    int command;
+
 
     public Connection(Socket s, int nr){
         this.clientSocket = s;
         this.clientNumber = nr;
+        this.text = "";
 
         // pornire fir curent
         start();
@@ -35,94 +40,142 @@ public class Connection extends Thread {
         }
 
         // creeaza lista de task-uri
-        ArrayList<Task> taskList = new ArrayList<>();
-        String text = "";
+        taskList = new ArrayList<>();
 
         while(true) {
+            try {
+                text = in.readUTF();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
 
-            int command  = text.charAt(0);
+            command  = text.charAt(0);
             text = text.substring(1).trim();
             int id = 0;
 
             switch(command) {
                 case '1':
-                    // adauga task in lista
-                    taskList.add(new Task(text, id++));
+                    addTask();
                     break;
                 case '2':
-                    // sterge task din lista
-                    int removeId = Integer.parseInt(text) - 1;
-
-                    if(removeId < 0 || removeId > taskList.size() - 1) {
-                        try {
-                            out.writeUTF("Numarul activitatii introdus gresit");
-                            out.flush();
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                    else {
-                        taskList.remove(removeId);
-                        try {
-                            out.writeUTF("");
-                            out.flush();
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-
+                    deleteTask();
                     break;
 
                 case '3':
-                    // finalizeaza task
-                    int statusId = Integer.parseInt(text) - 1;
-
-                    if(statusId < 0 || statusId > taskList.size() -1) {
-                        try {
-                            out.writeUTF("Numarul activitatii introdus gresit");
-                            out.flush();
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                    else {
-                        taskList.get(statusId).setStatus("Finalizat");
-                        try {
-                            out.writeUTF("");
-                            out.flush();
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-
+                    finalizeTask();
                     break;
 
                 case '4':
-                    // trimite lista de task-uri catre client
-                    synchronized(taskList) {
-                        try {
-                            // curata output-ul de valorile precedente
-                            out.reset();
-                            out.writeObject(taskList);
-                            out.flush();
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-
-                    }
+                    showList();
                     break;
 
                 case '5':
-                    System.out.println("Inchide");
-
                     // inchide conexiunea
-                    System.out.println("Clientul " + clientNumber + " deconectat");
+                    System.out.println("Clientul " + clientNumber + " deconectat\n");
                     return;
 
                 default:
-                    System.out.println("Comanda gresita");
+                    System.out.println("Comanda gresita\n");
                     break;
             }
+        }
+    }
+
+
+    // adauga un task in lista
+    public synchronized void addTask() {
+        System.out.println("Clientul " + clientNumber + " : adaugare");
+        // adauga task in lista
+        taskList.add(new Task(text));
+    }
+
+
+    // sterge un task din lista
+    public synchronized void deleteTask() {
+        System.out.println("Clientul " + clientNumber + " : stergere");
+
+        // sterge task din lista
+        if(!text.matches("[0-9]+")) {
+            try {
+                out.writeUTF("Numarul activitatii introdus gresit");
+                out.flush();
+                return;
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        int removeId = Integer.parseInt(text) - 1;
+
+        if(removeId < 0 || removeId > taskList.size() - 1) {
+            try {
+                out.writeUTF("Numarul activitatii introdus gresit");
+                out.flush();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        else {
+            taskList.remove(removeId);
+            try {
+                out.writeUTF("");
+                out.flush();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    // finalizeaza task
+    public synchronized void finalizeTask() {
+        System.out.println("Clientul " + clientNumber + " : finalizare\n");
+
+        // finalizeaza task
+        if(!text.matches("[0-9]+")) {
+            try {
+                out.writeUTF("Numarul activitatii introdus gresit");
+                out.flush();
+                return;
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        int statusId = Integer.parseInt(text) - 1;
+
+        if(statusId < 0 || statusId > taskList.size() -1) {
+            try {
+                out.writeUTF("Numarul activitatii introdus gresit\n");
+                out.flush();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        else {
+            taskList.get(statusId).setStatus("Finalizat");
+            try {
+                out.writeUTF("");
+                out.flush();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+
+    // afiseaza lista
+    public synchronized  void showList() {
+        System.out.println("Clientul " + clientNumber + " : afisare\n");
+        // trimite lista de task-uri catre client
+        synchronized(taskList) {
+            try {
+                // curata output-ul de valorile precedente
+                out.reset();
+                out.writeObject(taskList);
+                out.flush();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
         }
     }
 }

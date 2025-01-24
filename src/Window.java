@@ -35,15 +35,15 @@ public class Window extends JFrame {
         label = new JLabel("Bine ai venit, client " + client + "!", SwingConstants.CENTER);
         label.setBorder(BorderFactory.createEmptyBorder(10, 50, 10, 50));
         label.setForeground(new Color(255, 87, 51));
-        label.setFont(new Font("Arial", Font.BOLD, 45));
+        label.setFont(new Font("Arial", Font.BOLD, 40));
 
         textbox = new JTextField(30);
         textbox.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(Color.WHITE, 30),
                 BorderFactory.createLineBorder(Color.black, 1)
         ));
-        textbox.setBackground(Color.lightGray);
-        textbox.setFont(new Font("Arial", Font.PLAIN, 20));
+        textbox.setBackground(Color.white);
+        textbox.setFont(new Font("Arial", Font.PLAIN, 15));
 
         b1 = new JButton("Adauga activitate");
         b1.setBackground(new Color(255, 181, 51));
@@ -69,18 +69,25 @@ public class Window extends JFrame {
                 BorderFactory.createLineBorder(Color.black, 1)
         ));
         display.setBackground(new Color(218, 247, 166));
-        display.setFont(new Font("Arial", Font.PLAIN, 20));
+        display.setFont(new Font("Arial", Font.PLAIN, 15));
+
+        JScrollPane scrollPane = new JScrollPane(
+                display,
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED
+        );
+
 
         errorMessage = new JLabel();
         errorMessage.setBorder(BorderFactory.createEmptyBorder(1, 5, 1, 5));
         errorMessage.setForeground(new Color(199, 0, 57));
-        errorMessage.setFont(new Font("Arial", Font.PLAIN, 10));
+        errorMessage.setFont(new Font("Arial", Font.PLAIN, 15));
 
 
         add(label);
         add(textbox);
         add(buttonArea);
-        add(display);
+        add(scrollPane);
         add(errorMessage);
 
         // adauga evenimente butoanelor

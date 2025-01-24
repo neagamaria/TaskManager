@@ -2,11 +2,9 @@ import java.io.Serializable;
 
 public class Task implements Serializable {
     private String text, status;
-    int id;
 
-    public Task(String text, int id) {
+    public Task(String text) {
         this.text = text;
-        this.id = id;
         this.status = "In lucru";
     }
 

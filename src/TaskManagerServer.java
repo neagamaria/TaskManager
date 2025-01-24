@@ -12,6 +12,7 @@ public class TaskManagerServer {
     static int clientNumber = 0;
     public static void main(String[] args) throws IOException {
         ServerSocket serverSocket;
+
         // creare socket server
         Scanner sc = new Scanner(System.in);
         System.out.println("Portul pentru server: ");
@@ -21,14 +22,15 @@ public class TaskManagerServer {
         catch(Exception e) {
             throw new RuntimeException(e);
         }
+
         sc.nextLine();
-        System.out.println("Serverul ruleaza");
+        System.out.println("Serverul ruleaza\n");
 
         while (true) {
             // acceptă conectarea cu un nou socket de client
             Socket clientSocket = serverSocket.accept();
             clientNumber++;
-            System.out.println("Clientul " + clientNumber + " conectat");
+            System.out.println("Clientul " + clientNumber + " conectat\n");
             new Connection(clientSocket, clientNumber);
         }
     }

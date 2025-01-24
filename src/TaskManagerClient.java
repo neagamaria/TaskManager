@@ -14,7 +14,7 @@ public class TaskManagerClient {
         System.out.println("Adresa si portul serverului: ");
         try {
             clientSocket = new Socket(sc.next(), sc.nextInt());
-            System.out.println("Conectat la server");
+            System.out.println("Conectat la server\n");
             sc.nextLine();
         } catch (Exception e) {
             System.out.println("Conexiune esuata " + new RuntimeException(e));
@@ -29,8 +29,6 @@ public class TaskManagerClient {
         try {
             // ia numarul clientului
             String number = in.readUTF();
-            System.out.println(number);
-
             clientWindow = new Window(number);
             clientWindow.setSize(1000, 500);
             clientWindow.setVisible(true);
@@ -50,6 +48,7 @@ public class TaskManagerClient {
                     case "1":
                         clientWindow.errorMessage.setText("");
                         text = clientWindow.textbox.getText().trim();
+                        out.flush();
                         out.writeUTF("1" + text);
                         clientWindow.command = "";
                         out.flush();
